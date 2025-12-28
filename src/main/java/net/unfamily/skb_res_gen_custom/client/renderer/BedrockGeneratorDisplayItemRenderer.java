@@ -18,8 +18,8 @@ public class BedrockGeneratorDisplayItemRenderer extends GeoItemRenderer<Bedrock
     public void renderByItem(ItemStack stack, ItemDisplayContext displayContext, PoseStack poseStack,
                             MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         // Read tier and baseId from NBT
-        String tier = "gold"; // Default
-        String baseId = "obsidian"; // Default changed for test
+        String tier = null;
+        String baseId = null;
         
         try {
             CompoundTag tag = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, 
@@ -36,13 +36,14 @@ public class BedrockGeneratorDisplayItemRenderer extends GeoItemRenderer<Bedrock
                 }
             }
         } catch (Exception e) {
-            // Fallback
+            // Fallback - will use default texture
             System.out.println("[DEBUG] Error reading item NBT: " + e.getMessage());
         }
         
+        // If no NBT data (creative tab), both will be null and default texture will be used
         System.out.println("[DEBUG] Rendering item with tier=" + tier + " baseId=" + baseId);
         
-        // Pass tier and baseId to model via ThreadLocal
+        // Pass tier and baseId to model via ThreadLocal (null values trigger default texture)
         BedrockGeneratorItemModel.CURRENT_TIER.set(tier);
         BedrockGeneratorItemModel.CURRENT_BASE_ID.set(baseId);
         

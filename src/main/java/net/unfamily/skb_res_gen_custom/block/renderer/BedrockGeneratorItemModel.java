@@ -5,9 +5,10 @@ import net.unfamily.skb_res_gen_custom.block.display.BedrockGeneratorDisplayItem
 import software.bernie.geckolib.model.GeoModel;
 
 public class BedrockGeneratorItemModel extends GeoModel<BedrockGeneratorDisplayItem> {
-    // ThreadLocal per passare tier e base_id dal renderer al model
-    public static final ThreadLocal<String> CURRENT_TIER = ThreadLocal.withInitial(() -> "gold");
-    public static final ThreadLocal<String> CURRENT_BASE_ID = ThreadLocal.withInitial(() -> "cobblestone");
+    // ThreadLocal to pass tier and base_id from renderer to model
+    // Use null as default to detect when no NBT is present
+    public static final ThreadLocal<String> CURRENT_TIER = new ThreadLocal<>();
+    public static final ThreadLocal<String> CURRENT_BASE_ID = new ThreadLocal<>();
     
     @Override
     public ResourceLocation getModelResource(BedrockGeneratorDisplayItem object) {
@@ -20,20 +21,13 @@ public class BedrockGeneratorItemModel extends GeoModel<BedrockGeneratorDisplayI
         String baseId = CURRENT_BASE_ID.get();
         String tier = CURRENT_TIER.get();
         
-        // If no configuration, use default texture
-        if ((baseId == null || baseId.isEmpty() || baseId.equals("cobblestone")) &&
-            (tier == null || tier.isEmpty() || tier.equals("gold"))) {
+        // If no configuration (creative tab item), use default texture
+        if (baseId == null || tier == null) {
+            System.out.println("[DEBUG] ItemModel using default texture (no NBT)");
             return ResourceLocation.fromNamespaceAndPath(
                 "skb_res_gen_custom",
                 "textures/block/default_texture.png"
             );
-        }
-        
-        if (baseId == null || baseId.isEmpty()) {
-            baseId = "obsidian"; // default changed for test
-        }
-        if (tier == null || tier.isEmpty()) {
-            tier = "gold"; // default
         }
         
         System.out.println("[DEBUG] ItemModel getTextureResource: tier=" + tier + " baseId=" + baseId);
