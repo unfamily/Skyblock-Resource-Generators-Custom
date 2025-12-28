@@ -1,0 +1,13 @@
+{
+  "itemGroup.skb_res_gen_custom": "Generatori di Risorse Skyblock",
+  "block.skb_res_gen_custom.resource_generator": "Generatore di Risorse",
+  "item.skb_res_gen_custom.resource_generator": "Generatore di Risorse",
+  "command.skb_res_gen.reload.success": "Ricaricate %s definizioni di generatori custom",
+  "command.skb_res_gen.reload.failed": "Errore nel ricaricamento delle definizioni: %s",
+  "command.skb_res_gen.give.success": "Dati %s x %s Generatore %s a %s",
+  "command.skb_res_gen.give.multiple": "Dati %s x %s Generatore %s a %s giocatori",
+  "command.skb_res_gen.give.invalid_tier": "Tier non valido. Usa: wooden, stone, iron, gold, diamond, netherite",
+  "command.skb_res_gen.give.not_found": "Generatore non trovato: %s",
+  "modmenu.description": "Una mod per creare generatori di risorse custom con configurazione JSON dinamica"
+}
+

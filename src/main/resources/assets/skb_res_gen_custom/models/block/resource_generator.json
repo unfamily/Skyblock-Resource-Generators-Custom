@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "skb_res_gen_custom:block/default_texture",
+    "particle": "skb_res_gen_custom:block/default_texture"
+  }
+}
+

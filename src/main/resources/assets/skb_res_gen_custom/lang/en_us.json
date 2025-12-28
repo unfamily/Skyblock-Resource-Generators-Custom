@@ -1,0 +1,12 @@
+{
+  "itemGroup.skb_res_gen_custom": "Skyblock Resource Generators",
+  "block.skb_res_gen_custom.resource_generator": "Resource Generator",
+  "item.skb_res_gen_custom.resource_generator": "Resource Generator",
+  "command.skb_res_gen.reload.success": "Reloaded %s custom generator definitions",
+  "command.skb_res_gen.reload.failed": "Failed to reload generator definitions: %s",
+  "command.skb_res_gen.give.success": "Gave %s x %s %s Generator to %s",
+  "command.skb_res_gen.give.multiple": "Gave %s x %s %s Generator to %s players",
+  "command.skb_res_gen.give.invalid_tier": "Invalid tier. Use: wooden, stone, iron, gold, diamond, netherite",
+  "command.skb_res_gen.give.not_found": "Generator not found: %s",
+  "modmenu.description": "A mod to create custom resource generators with dynamic JSON configuration"
+}

@@ -1,0 +1,93 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Client",
+      "presentation": {
+        "group": "Mod Development - Skyblock-Resource-Generators-Custom",
+        "order": 0
+      },
+      "projectName": "Skyblock-Resource-Generators-Custom",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/build/moddev/clientRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/build/moddev/clientRunVmArgs.txt",
+        "-Dfml.modFolders\u003dskb_res_gen_custom%%/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Data",
+      "presentation": {
+        "group": "Mod Development - Skyblock-Resource-Generators-Custom",
+        "order": 1
+      },
+      "projectName": "Skyblock-Resource-Generators-Custom",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/build/moddev/dataRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/build/moddev/dataRunVmArgs.txt",
+        "-Dfml.modFolders\u003dskb_res_gen_custom%%/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "GameTestServer",
+      "presentation": {
+        "group": "Mod Development - Skyblock-Resource-Generators-Custom",
+        "order": 2
+      },
+      "projectName": "Skyblock-Resource-Generators-Custom",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/build/moddev/gameTestServerRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/build/moddev/gameTestServerRunVmArgs.txt",
+        "-Dfml.modFolders\u003dskb_res_gen_custom%%/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    },
+    {
+      "type": "java",
+      "request": "launch",
+      "name": "Server",
+      "presentation": {
+        "group": "Mod Development - Skyblock-Resource-Generators-Custom",
+        "order": 3
+      },
+      "projectName": "Skyblock-Resource-Generators-Custom",
+      "mainClass": "net.neoforged.devlaunch.Main",
+      "args": [
+        "@/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/build/moddev/serverRunProgramArgs.txt"
+      ],
+      "vmArgs": [
+        "@/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/build/moddev/serverRunVmArgs.txt",
+        "-Dfml.modFolders\u003dskb_res_gen_custom%%/home/unfamily/IdeaProjects/Skyblock-Resource-Generators-Custom/bin/main"
+      ],
+      "cwd": "${workspaceFolder}/run",
+      "env": {},
+      "console": "internalConsole",
+      "shortenCommandLine": "none"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "variants": {
+    "": {
+      "model": "skb_res_gen_custom:block/resource_generator"
+    }
+  }
+}
+
+
