@@ -100,102 +100,10 @@ public class GeneratorLoader {
      */
     private static void createReadme(Path configPath) {
         try {
-            Path readmePath = configPath.resolve("README.md");
-            
-            String readmeContent = "# Custom Generators - External Configuration\n\n" +
-                "This directory contains configuration files for custom resource generators.\n\n" +
-                "## Format\n\n" +
-                "The format is JSON with the following structure:\n\n" +
-                "```json\n" +
-                "{\n" +
-                "  \"type\": \"skb_res_gen_custom:skb_res_gen_custom\",\n" +
-                "  \"generators\": [\n" +
-                "    {\n" +
-                "      \"base_id\": \"example-obsidian\",\n" +
-                "      \"creative_tab\": true,\n" +
-                "      \"output\": \"minecraft:obsidian\",\n" +
-                "      \"times\": [500, 300, 100, 100, 50, 50],\n" +
-                "      \"stacks\": [1, 1, 1, 16, 16, 64]\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}\n" +
-                "```\n\n" +
-                "## Fields\n\n" +
-                "### Required Fields\n" +
-                "- `type`: Must be \"skb_res_gen_custom:skb_res_gen_custom\" (required)\n" +
-                "- `generators`: Array of generator definitions (required)\n\n" +
-                "### Generator Definition Fields\n" +
-                "- `base_id`: Unique identifier for the generator (e.g., \"example-obsidian\")\n" +
-                "  - Will create generators for all tiers: wooden, stone, iron, gold, diamond, netherite\n" +
-                "  - Example: \"example-obsidian\" → \"wooden_example_obsidian_generator\", \"stone_example_obsidian_generator\", etc.\n" +
-                "- `creative_tab`: Whether the generators should appear in the creative tab (true/false)\n" +
-                "- `output`: The item to generate (e.g., \"minecraft:obsidian\", \"minecraft:diamond\")\n" +
-                "- `times`: Array of 6 integers representing generation time in ticks for each tier\n" +
-                "  - Order: [wooden, stone, iron, gold, diamond, netherite]\n" +
-                "  - Example: [500, 300, 100, 100, 50, 50] means wooden takes 500 ticks (25 seconds)\n" +
-                "  - 20 ticks = 1 second\n" +
-                "- `stacks`: Array of 6 integers representing stack size generated for each tier\n" +
-                "  - Order: [wooden, stone, iron, gold, diamond, netherite]\n" +
-                "  - Example: [1, 1, 1, 16, 16, 64] means wooden generates 1 item, netherite generates 64\n\n" +
-                "## Examples\n\n" +
-                "### Example 1: Obsidian Generator\n" +
-                "```json\n" +
-                "{\n" +
-                "  \"type\": \"skb_res_gen_custom:skb_res_gen_custom\",\n" +
-                "  \"generators\": [\n" +
-                "    {\n" +
-                "      \"base_id\": \"example-obsidian\",\n" +
-                "      \"creative_tab\": true,\n" +
-                "      \"output\": \"minecraft:obsidian\",\n" +
-                "      \"times\": [500, 300, 100, 100, 50, 50],\n" +
-                "      \"stacks\": [1, 1, 1, 16, 16, 64]\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}\n" +
-                "```\n\n" +
-                "### Example 2: Multiple Generators\n" +
-                "```json\n" +
-                "{\n" +
-                "  \"type\": \"skb_res_gen_custom:skb_res_gen_custom\",\n" +
-                "  \"generators\": [\n" +
-                "    {\n" +
-                "      \"base_id\": \"example-obsidian\",\n" +
-                "      \"creative_tab\": true,\n" +
-                "      \"output\": \"minecraft:obsidian\",\n" +
-                "      \"times\": [500, 300, 100, 100, 50, 50],\n" +
-                "      \"stacks\": [1, 1, 1, 16, 16, 64]\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"base_id\": \"example-tnt\",\n" +
-                "      \"creative_tab\": false,\n" +
-                "      \"output\": \"minecraft:tnt\",\n" +
-                "      \"times\": [600, 400, 200, 150, 100, 50],\n" +
-                "      \"stacks\": [1, 2, 4, 8, 16, 32]\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}\n" +
-                "```\n\n" +
-                "## Important Notes\n\n" +
-                "- All generators use the same 3D model and textures as the bedrock generator\n" +
-                "- The `base_id` must be unique across all configuration files\n" +
-                "- Both `times` and `stacks` arrays must have exactly 6 values\n" +
-                "- All time and stack values must be positive integers\n" +
-                "- Changes require a game restart to take effect\n" +
-                "- Invalid configurations will be logged and skipped\n\n" +
-                "## Tiers\n\n" +
-                "The six tiers are:\n" +
-                "1. Wooden - Slowest, generates least\n" +
-                "2. Stone - Slow\n" +
-                "3. Iron - Medium\n" +
-                "4. Gold - Fast\n" +
-                "5. Diamond - Very fast\n" +
-                "6. Netherite - Fastest, generates most\n";
-            
-            Files.write(readmePath, readmeContent.getBytes());
-            LOGGER.info("Created README.md file at {}", readmePath);
-            
-        } catch (IOException e) {
-            LOGGER.error("Failed to create README.md file: {}", e.getMessage());
+            // Delegate to the centralized ReadmeGenerator so content and formatting are consistent
+            net.unfamily.skb_res_gen_custom.util.ReadmeGenerator.writeReadme(configPath, true);
+        } catch (Exception e) {
+            LOGGER.error("Failed to create README.md file via ReadmeGenerator: {}", e.getMessage());
         }
     }
     

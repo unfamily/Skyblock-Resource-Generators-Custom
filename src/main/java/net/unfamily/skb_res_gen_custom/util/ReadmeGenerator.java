@@ -30,7 +30,7 @@ public final class ReadmeGenerator {
             }
 
             String content = """
-                # Skyblock Resource Generators (Custom) — generators.json guide
+                # Skyblock Resource Generators - generators.json guide
 
                 Location
                 - Place your configuration file at: `run/kubejs/external_scripts/skb_res_gen_custom/generators.json`
@@ -38,7 +38,7 @@ public final class ReadmeGenerator {
 
                 Top-level format
                 - JSON object with:
-                  - `type`: must be `\"skb_res_gen_custom:skb_res_gen_custom\"`
+                  - `type`: must be `"skb_res_gen_custom:skb_res_gen_custom"`
                   - `generators`: array of generator definitions
 
                 Generator entry fields
@@ -58,12 +58,34 @@ public final class ReadmeGenerator {
 
                 Texture naming & placement
                 - Place textures under: `assets/skb_res_gen_custom/textures/block/`
-                - Filename convention: `{base_id}_{tier}.png`
-                  - Example: `obsidian_gold.png`, `netherite_scrap_wooden.png`
-                - Provide all 6 files for each `base_id` (wooden, stone, iron, gold, diamond, netherite).
+                - Filename convention: `{base_id}_{tier}.png` (e.g. `obsidian_gold.png`)
+                - Provide all 6 files per `base_id` (wooden, stone, iron, gold, diamond, netherite).
                 - If a texture is missing, the mod falls back to `textures/block/default_texture.png`.
-                - The combined texture should include both frame and core. The provided default uses a bedrock-like core and a dark frame;
-                  you may replace it with your own combined texture following the naming convention.
+
+                Texture layout (visual, 64x64 atlas)
+                - Combined image size: 64x64 pixels (4x4 grid of 16x16 tiles).
+                - The renderer expects the **core** to be duplicated and the **frame** to be present once.
+                - The following ASCII grid shows the recommended placement (each cell = 16x16):
+
+                +----------+----------+
+                |          |          |
+                |   CORE   |   CORE   |
+                |          |          |
+                +----------+----------+
+                |          |          |
+                |          |  FRAME   |
+                |          |          |
+                +----------+----------+
+
+                Legend:
+                - CORE  = Core (duplicated 16x16 cells; both must contain the same core texture)
+                - FRAME = Frame (single 16x16 cell)
+                - empty = unused / transparent
+
+                Interpretation:
+                - CORE occupies the top-left two cells (duplicated).
+                - FRAME occupies the first cell of the second row.
+                - Remaining cells may be transparent or used for variants.
 
                 Behavior notes
                 - JEI visualization: the mod registers visual recipes so JEI shows the conversion like the native mod.
@@ -89,6 +111,15 @@ public final class ReadmeGenerator {
                       "times": [200, 150, 100, 80, 60, 40],
                       "stacks": [1, 2, 3, 4, 5, 6],
                       "recipe": "minecraft:obsidian"
+                    },
+                    {
+                      "base_id": "red_sand",
+                      "name": "Red Sand",
+                      "creative_tab": true,
+                      "output": "minecraft:red_sand",
+                      "times": [400, 300, 200, 150, 100, 80],
+                      "stacks": [1, 1, 2, 2, 4, 4],
+                      "recipe": "minecraft:red_sand"
                     }
                   ]
                 }

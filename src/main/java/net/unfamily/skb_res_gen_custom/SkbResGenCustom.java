@@ -70,7 +70,7 @@ public class SkbResGenCustom {
             // Generate README in the same directory the loader scans (run/kubejs/external_scripts/skb_res_gen_custom/)
             try {
                 Path readmeDir = Path.of("run", "kubejs", "external_scripts", "skb_res_gen_custom");
-                ReadmeGenerator.writeReadme(readmeDir, false);
+                ReadmeGenerator.writeReadme(readmeDir, true); // force overwrite to apply latest template
             } catch (Exception e) {
                 LOGGER.debug("Failed to generate README for custom generators: {}", e.getMessage());
             }
