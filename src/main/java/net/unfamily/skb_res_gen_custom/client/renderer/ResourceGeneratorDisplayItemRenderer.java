@@ -6,12 +6,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import software.bernie.geckolib.renderer.GeoItemRenderer;
-import net.unfamily.skb_res_gen_custom.block.display.BedrockGeneratorDisplayItem;
-import net.unfamily.skb_res_gen_custom.block.renderer.BedrockGeneratorItemModel;
+import net.unfamily.skb_res_gen_custom.block.display.ResourceGeneratorDisplayItem;
+import net.unfamily.skb_res_gen_custom.block.renderer.ResourceGeneratorItemModel;
 
-public class BedrockGeneratorDisplayItemRenderer extends GeoItemRenderer<BedrockGeneratorDisplayItem> {
-    public BedrockGeneratorDisplayItemRenderer() {
-        super(new BedrockGeneratorItemModel());
+public class ResourceGeneratorDisplayItemRenderer extends GeoItemRenderer<ResourceGeneratorDisplayItem> {
+    public ResourceGeneratorDisplayItemRenderer() {
+        super(new ResourceGeneratorItemModel());
     }
     
     @Override
@@ -30,7 +30,8 @@ public class BedrockGeneratorDisplayItemRenderer extends GeoItemRenderer<Bedrock
                 if (readTier != null && !readTier.isEmpty()) {
                     tier = readTier;
                 }
-                String readBaseId = genData.getString("baseId");
+                // IMPORTANT: NBT uses "base_id" (with underscore), not "baseId"
+                String readBaseId = genData.getString("base_id");
                 if (readBaseId != null && !readBaseId.isEmpty()) {
                     baseId = readBaseId;
                 }
@@ -44,16 +45,16 @@ public class BedrockGeneratorDisplayItemRenderer extends GeoItemRenderer<Bedrock
         System.out.println("[DEBUG] Rendering item with tier=" + tier + " baseId=" + baseId);
         
         // Pass tier and baseId to model via ThreadLocal (null values trigger default texture)
-        BedrockGeneratorItemModel.CURRENT_TIER.set(tier);
-        BedrockGeneratorItemModel.CURRENT_BASE_ID.set(baseId);
+        ResourceGeneratorItemModel.CURRENT_TIER.set(tier);
+        ResourceGeneratorItemModel.CURRENT_BASE_ID.set(baseId);
         
         try {
             // Render
             super.renderByItem(stack, displayContext, poseStack, bufferSource, packedLight, packedOverlay);
         } finally {
             // Cleanup
-            BedrockGeneratorItemModel.CURRENT_TIER.remove();
-            BedrockGeneratorItemModel.CURRENT_BASE_ID.remove();
+            ResourceGeneratorItemModel.CURRENT_TIER.remove();
+            ResourceGeneratorItemModel.CURRENT_BASE_ID.remove();
         }
     }
 }

@@ -12,14 +12,16 @@ public class GeneratorDefinition {
     private final String output;
     private final int[] times;
     private final int[] stacks;
+    private final String recipe; // Item ID for conversion (e.g., "minecraft:obsidian")
     
-    public GeneratorDefinition(String baseId, String name, boolean creativeTab, String output, int[] times, int[] stacks) {
+    public GeneratorDefinition(String baseId, String name, boolean creativeTab, String output, int[] times, int[] stacks, String recipe) {
         this.baseId = baseId;
         this.name = name;
         this.creativeTab = creativeTab;
         this.output = output;
         this.times = times;
         this.stacks = stacks;
+        this.recipe = recipe;
     }
     
     public String getBaseId() {
@@ -44,6 +46,10 @@ public class GeneratorDefinition {
     
     public int[] getStacks() {
         return stacks;
+    }
+    
+    public String getRecipe() {
+        return recipe;
     }
     
     /**
@@ -96,6 +102,7 @@ public class GeneratorDefinition {
                 ", output='" + output + '\'' +
                 ", times=" + Arrays.toString(times) +
                 ", stacks=" + Arrays.toString(stacks) +
+                ", recipe='" + recipe + '\'' +
                 '}';
     }
 }

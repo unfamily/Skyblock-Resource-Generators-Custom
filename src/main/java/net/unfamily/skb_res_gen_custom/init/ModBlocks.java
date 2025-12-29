@@ -4,11 +4,11 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.unfamily.skb_res_gen_custom.SkbResGenCustom;
-import net.unfamily.skb_res_gen_custom.block.BedrockGeneratorBlock;
+import net.unfamily.skb_res_gen_custom.block.ResourceGeneratorBlock;
 
 public class ModBlocks {
     public static final DeferredRegister.Blocks REGISTRY = DeferredRegister.createBlocks(SkbResGenCustom.MOD_ID);
     
-    public static final DeferredBlock<Block> RESOURCE_GENERATOR = REGISTRY.register("resource_generator", BedrockGeneratorBlock::new);
+    public static final DeferredBlock<Block> RESOURCE_GENERATOR = REGISTRY.register("resource_generator", ResourceGeneratorBlock::new);
 }
 

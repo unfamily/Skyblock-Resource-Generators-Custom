@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "net.unfamily.skb_res_gen_custom.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "skb_res_gen_custom.refmap.json",
+  "client": [
+    "JEIRecipeRegistrationMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+

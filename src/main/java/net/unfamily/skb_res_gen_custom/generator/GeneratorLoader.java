@@ -344,8 +344,14 @@ public class GeneratorLoader {
             }
             String name = generatorJson.get("name").getAsString();
             
+            // Get recipe item (optional, defaults to null)
+            String recipe = null;
+            if (generatorJson.has("recipe") && generatorJson.get("recipe").isJsonPrimitive()) {
+                recipe = generatorJson.get("recipe").getAsString();
+            }
+            
             // Create generator definition
-            GeneratorDefinition definition = new GeneratorDefinition(baseId, name, creativeTab, output, times, stacks);
+            GeneratorDefinition definition = new GeneratorDefinition(baseId, name, creativeTab, output, times, stacks, recipe);
             
             // Validate definition
             if (!definition.isValid()) {

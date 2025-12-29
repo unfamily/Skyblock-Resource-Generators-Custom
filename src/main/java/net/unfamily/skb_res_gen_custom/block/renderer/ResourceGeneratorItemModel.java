@@ -1,22 +1,22 @@
 package net.unfamily.skb_res_gen_custom.block.renderer;
 
 import net.minecraft.resources.ResourceLocation;
-import net.unfamily.skb_res_gen_custom.block.display.BedrockGeneratorDisplayItem;
+import net.unfamily.skb_res_gen_custom.block.display.ResourceGeneratorDisplayItem;
 import software.bernie.geckolib.model.GeoModel;
 
-public class BedrockGeneratorItemModel extends GeoModel<BedrockGeneratorDisplayItem> {
+public class ResourceGeneratorItemModel extends GeoModel<ResourceGeneratorDisplayItem> {
     // ThreadLocal to pass tier and base_id from renderer to model
     // Use null as default to detect when no NBT is present
     public static final ThreadLocal<String> CURRENT_TIER = new ThreadLocal<>();
     public static final ThreadLocal<String> CURRENT_BASE_ID = new ThreadLocal<>();
     
     @Override
-    public ResourceLocation getModelResource(BedrockGeneratorDisplayItem object) {
+    public ResourceLocation getModelResource(ResourceGeneratorDisplayItem object) {
         return ResourceLocation.parse("skyblock_resources:geo/resource_casing.geo.json");
     }
 
     @Override
-    public ResourceLocation getTextureResource(BedrockGeneratorDisplayItem object) {
+    public ResourceLocation getTextureResource(ResourceGeneratorDisplayItem object) {
         // Use complete texture based on base_id + tier from ThreadLocal
         String baseId = CURRENT_BASE_ID.get();
         String tier = CURRENT_TIER.get();
@@ -44,7 +44,7 @@ public class BedrockGeneratorItemModel extends GeoModel<BedrockGeneratorDisplayI
     }
 
     @Override
-    public ResourceLocation getAnimationResource(BedrockGeneratorDisplayItem object) {
+    public ResourceLocation getAnimationResource(ResourceGeneratorDisplayItem object) {
         return ResourceLocation.parse("skyblock_resources:animations/resource_casing.animation.json");
     }
 }

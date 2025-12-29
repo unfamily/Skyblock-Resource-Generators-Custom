@@ -1,5 +1,6 @@
 {
   "itemGroup.skb_res_gen_custom": "Skyblock Resource Generators",
+  "itemGroup.skb_res_gen_custom.tab": "Skyb Resource Generators Custom",
   "block.skb_res_gen_custom.resource_generator": "Resource Generator",
   "item.skb_res_gen_custom.resource_generator": "Resource Generator",
   "command.skb_res_gen.reload.success": "Reloaded %s custom generator definitions",

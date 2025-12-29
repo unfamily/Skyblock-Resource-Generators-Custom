@@ -12,7 +12,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.unfamily.skb_res_gen_custom.block.display.BedrockGeneratorDisplayItem;
+import net.unfamily.skb_res_gen_custom.block.display.ResourceGeneratorDisplayItem;
 import net.unfamily.skb_res_gen_custom.generator.GeneratorDefinition;
 import net.unfamily.skb_res_gen_custom.generator.GeneratorLoader;
 import net.unfamily.skb_res_gen_custom.init.ModBlocks;
@@ -43,8 +43,8 @@ public class GiveGeneratorCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             Commands.literal("skb_res_gen")
+                .requires(source -> source.hasPermission(2)) // Require operator permissions for the whole command
                 .then(Commands.literal("give")
-                    .requires(source -> source.hasPermission(2)) // Requires operator permissions
                     .then(Commands.argument("player", EntityArgument.players())
                         .then(Commands.argument("base_id", StringArgumentType.string())
                             .suggests(SUGGEST_GENERATORS)
@@ -100,7 +100,7 @@ public class GiveGeneratorCommand {
         
         try {
             // Create configured stack
-            ItemStack stack = BedrockGeneratorDisplayItem.createConfiguredStack(
+            ItemStack stack = ResourceGeneratorDisplayItem.createConfiguredStack(
                 ModBlocks.RESOURCE_GENERATOR.get(),
                 tier.toLowerCase(),
                 baseId

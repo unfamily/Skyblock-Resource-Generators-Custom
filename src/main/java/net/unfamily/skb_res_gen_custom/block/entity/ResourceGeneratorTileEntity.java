@@ -33,12 +33,12 @@ import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import net.unfamily.skb_res_gen_custom.init.ModBlockEntities;
-import net.unfamily.skb_res_gen_custom.block.BedrockGeneratorBlock;
+import net.unfamily.skb_res_gen_custom.block.ResourceGeneratorBlock;
 import net.unfamily.skb_res_gen_custom.generator.GeneratorDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.BuiltInRegistries;
 
-public class BedrockGeneratorTileEntity extends RandomizableContainerBlockEntity implements WorldlyContainer, GeoBlockEntity {
+public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntity implements WorldlyContainer, GeoBlockEntity {
     private NonNullList<ItemStack> stacks = NonNullList.withSize(1, ItemStack.EMPTY);
     private final SidedInvWrapper handler = new SidedInvWrapper(this, null);
 
@@ -53,7 +53,7 @@ public class BedrockGeneratorTileEntity extends RandomizableContainerBlockEntity
     private int ticksPerGeneration = DEFAULT_TICKS_PER_GENERATION;
     private int stackSize = 1;
 
-    public BedrockGeneratorTileEntity(BlockPos pos, BlockState state) {
+    public ResourceGeneratorTileEntity(BlockPos pos, BlockState state) {
         super((BlockEntityType<?>) ModBlockEntities.RESOURCE_GENERATOR.get(), pos, state);
         if (getPersistentData().getDouble("ticks_remaining") == 0.0D) {
             getPersistentData().putDouble("ticks_remaining", getTicksPerGeneration());
@@ -161,8 +161,8 @@ public class BedrockGeneratorTileEntity extends RandomizableContainerBlockEntity
         try {
             if (this.level != null) {
                 BlockState bs = this.level.getBlockState(this.getBlockPos());
-                if (bs.getBlock() instanceof BedrockGeneratorBlock) {
-                    this.level.setBlock(this.getBlockPos(), bs.setValue(BedrockGeneratorBlock.ANIMATION, 1), 3);
+                if (bs.getBlock() instanceof ResourceGeneratorBlock) {
+                    this.level.setBlock(this.getBlockPos(), bs.setValue(ResourceGeneratorBlock.ANIMATION, 1), 3);
                 }
             }
         } catch (Exception ignored) {}
@@ -387,8 +387,8 @@ public class BedrockGeneratorTileEntity extends RandomizableContainerBlockEntity
     }
 
     /* GeckoLib: minimal animatable implementation so renderer accepts this tile entity */
-    private PlayState predicate(AnimationState<BedrockGeneratorTileEntity> event) {
-        String animationprocedure = String.valueOf(getBlockState().getValue(BedrockGeneratorBlock.ANIMATION));
+    private PlayState predicate(AnimationState<ResourceGeneratorTileEntity> event) {
+        String animationprocedure = String.valueOf(getBlockState().getValue(ResourceGeneratorBlock.ANIMATION));
         if (animationprocedure.equals("0")) {
             return event.setAndContinue(RawAnimation.begin().thenLoop("0"));
         }
@@ -401,8 +401,8 @@ public class BedrockGeneratorTileEntity extends RandomizableContainerBlockEntity
         data.add(new AnimationController<>(this, "procedurecontroller", 0, this::procedurePredicate));
     }
 
-    private PlayState procedurePredicate(AnimationState<BedrockGeneratorTileEntity> event) {
-        String animationprocedure = String.valueOf(getBlockState().getValue(BedrockGeneratorBlock.ANIMATION));
+    private PlayState procedurePredicate(AnimationState<ResourceGeneratorTileEntity> event) {
+        String animationprocedure = String.valueOf(getBlockState().getValue(ResourceGeneratorBlock.ANIMATION));
         if ((!animationprocedure.equals("0") && event.getController().getAnimationState() == AnimationController.State.STOPPED)
                 || (!animationprocedure.equals(this.prevAnim) && !animationprocedure.equals("0"))) {
             if (!animationprocedure.equals(this.prevAnim))
@@ -412,8 +412,8 @@ public class BedrockGeneratorTileEntity extends RandomizableContainerBlockEntity
                 // reset blockstate animation to 0
                 try {
                     BlockState bs = this.level.getBlockState(this.getBlockPos());
-                    if (bs.getBlock() instanceof BedrockGeneratorBlock) {
-                        this.level.setBlock(this.getBlockPos(), bs.setValue(BedrockGeneratorBlock.ANIMATION, 0), 3);
+                    if (bs.getBlock() instanceof ResourceGeneratorBlock) {
+                        this.level.setBlock(this.getBlockPos(), bs.setValue(ResourceGeneratorBlock.ANIMATION, 0), 3);
                     }
                 } catch (Exception ignored) {}
                 event.getController().forceAnimationReset();

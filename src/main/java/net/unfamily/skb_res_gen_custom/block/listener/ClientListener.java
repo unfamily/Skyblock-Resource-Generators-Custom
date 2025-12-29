@@ -1,6 +1,6 @@
 package net.unfamily.skb_res_gen_custom.block.listener;
 
-import net.unfamily.skb_res_gen_custom.block.renderer.BedrockGeneratorRenderer;
+import net.unfamily.skb_res_gen_custom.block.renderer.ResourceGeneratorRenderer;
 import net.unfamily.skb_res_gen_custom.init.ModBlockEntities;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -15,7 +15,7 @@ public class ClientListener {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         try {
             event.registerBlockEntityRenderer((net.minecraft.world.level.block.entity.BlockEntityType) ModBlockEntities.RESOURCE_GENERATOR.get(),
-                    context -> new BedrockGeneratorRenderer(context));
+                    context -> new ResourceGeneratorRenderer(context));
         } catch (Throwable ignored) {}
     }
 }

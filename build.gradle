@@ -29,6 +29,14 @@ repositories {
             includeGroup("software.bernie.geckolib")
         }
     }
+    // JEI repository
+    maven {
+        name = 'Jared Maven (JEI)'
+        url = 'https://maven.blamejared.com'
+        content {
+            includeGroup("mezz.jei")
+        }
+    }
     // Add here additional repositories if required by some of the dependencies below.
 }
 
@@ -125,6 +133,10 @@ configurations {
 dependencies {
     implementation "curse.maven:skyblock-resource-generators-594061:6997623"
     implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+    
+    // JEI integration (optional - only loaded if JEI is present)
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+    runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
