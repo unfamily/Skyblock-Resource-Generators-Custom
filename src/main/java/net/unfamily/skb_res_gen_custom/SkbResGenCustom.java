@@ -24,6 +24,7 @@ import net.unfamily.skb_res_gen_custom.init.ModBlocks;
 import net.unfamily.skb_res_gen_custom.init.ModBlockEntities;
 import net.unfamily.skb_res_gen_custom.init.ModDataComponents;
 import net.unfamily.skb_res_gen_custom.init.ModCreativeTabs;
+import net.unfamily.skb_res_gen_custom.recipe.ModIngredientTypes;
 import net.unfamily.skb_res_gen_custom.command.ReloadGeneratorsCommand;
 import net.unfamily.skb_res_gen_custom.command.GiveGeneratorCommand;
 import net.unfamily.skb_res_gen_custom.generator.GeneratorLoader;
@@ -42,11 +43,12 @@ public class SkbResGenCustom {
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public SkbResGenCustom(IEventBus modEventBus, ModContainer modContainer) {
-        // Register blocks, items, block entities, data components and creative tabs
+        // Register blocks, items, block entities, data components, ingredient types and creative tabs
         ModBlocks.REGISTRY.register(modEventBus);
         ModItems.REGISTRY.register(modEventBus);
         ModBlockEntities.REGISTRY.register(modEventBus);
         ModDataComponents.REGISTRY.register(modEventBus);
+        ModIngredientTypes.REGISTRY.register(modEventBus);
         ModCreativeTabs.REGISTRY.register(modEventBus);
         
         // Register the commonSetup method for modloading

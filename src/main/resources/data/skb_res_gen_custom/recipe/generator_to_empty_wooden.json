@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "type": "skb_res_gen_custom:generator_tier",
+      "tier": "wooden"
+    }
+  ],
+  "result": {
+    "id": "skyblock_resources:wooden_empty_generator"
+  }
+}
+
