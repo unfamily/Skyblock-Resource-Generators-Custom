@@ -119,7 +119,7 @@ public class GiveGeneratorCommand {
             final int finalSuccessCount = successCount;
             
             if (finalSuccessCount > 0) {
-                String generatorName = def.getName();
+                String generatorName = def.getName().getString();
                 String tierCapitalized = tier.substring(0, 1).toUpperCase() + tier.substring(1);
                 if (players.size() == 1) {
                     source.sendSuccess(
