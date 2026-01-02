@@ -144,17 +144,17 @@ public class ResourceGeneratorDisplayItem extends BlockItem implements GeoItem {
                     String baseId = genData.getString("base_id");
                     
                     if (!tier.isEmpty() && !baseId.isEmpty()) {
-                        // Load definition and configure tile entity
-                        GeneratorDefinition def = GeneratorLoader.getGenerator(baseId);
-                        if (def != null) {
-                            tileEntity.configureFromDefinition(def, tier);
-                        } else {
-                            // Fallback: use manual data if present
-                            if (genData.contains("output") && genData.contains("ticks") && genData.contains("stack_size")) {
-                                tileEntity.configure(tier, baseId, 
-                                    genData.getString("output"), 
-                                    genData.getInt("ticks"), 
-                                    genData.getInt("stack_size"));
+                    // Load definition and configure tile entity
+                    GeneratorDefinition def = GeneratorLoader.getGenerator(baseId);
+                    if (def != null) {
+                        tileEntity.configureFromDefinition(def, tier);
+                    } else {
+                        // Fallback: use manual data if present
+                        if (genData.contains("output") && genData.contains("ticks") && genData.contains("stack_size")) {
+                            tileEntity.configure(tier, baseId, 
+                                genData.getString("output"), 
+                                genData.getInt("ticks"), 
+                                genData.getInt("stack_size"));
                             }
                         }
                     }

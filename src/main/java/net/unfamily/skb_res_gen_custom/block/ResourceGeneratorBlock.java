@@ -261,7 +261,7 @@ public class ResourceGeneratorBlock extends BaseEntityBlock {
                           net.minecraft.sounds.SoundSource.BLOCKS, 1.0F, 6.0F);
             
             // Animation like native mod
-            player.swing(InteractionHand.MAIN_HAND, true);
+                player.swing(InteractionHand.MAIN_HAND, true);
         }
         
         return InteractionResult.sidedSuccess(level.isClientSide);
