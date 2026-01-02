@@ -43,7 +43,10 @@ public final class ReadmeGenerator {
 
                 Generator entry fields
                 - `base_id` (string, required): unique id for this generator (e.g. `obsidian`).
-                - `name` (string, required): readable name shown in the tooltip.
+                - `name` (string, required): translation key for the generator name.
+                  - Must start with `generator.` (e.g., `"generator.red_sand.name"`)
+                  - The full item name will be: `{name}.{tier}` (e.g., `generator.red_sand.name.netherite`)
+                  - Provide translations for each tier variant in language files.
                 - `output` (string, required): item that the generator produces (e.g. `minecraft:obsidian`).
                 - `times` (array of 6 ints, required): ticks per generation for tiers
                    (order: wooden, stone, iron, gold, diamond, netherite).
@@ -55,6 +58,7 @@ public final class ReadmeGenerator {
                 Validation
                 - `times` and `stacks` MUST have exactly 6 numeric entries.
                 - `base_id` and `name` must be non-empty.
+                - `name` must start with `generator.` to enable proper translation handling.
 
                 Texture naming & placement
                 - Place textures under: `assets/skb_res_gen_custom/textures/block/`
@@ -114,7 +118,7 @@ public final class ReadmeGenerator {
                     },
                     {
                       "base_id": "red_sand",
-                      "name": "Red Sand",
+                      "name": "generator.red_sand.name",
                       "creative_tab": true,
                       "output": "minecraft:red_sand",
                       "times": [400, 300, 200, 150, 100, 80],
@@ -127,8 +131,28 @@ public final class ReadmeGenerator {
 
                 Tips
                 - Always include the `name` for readable tooltips.
+                - The `name` field must be a translation key starting with `generator.` (e.g., `"generator.red_sand.name"`)
+                  - The system automatically appends the tier: `generator.red_sand.name.netherite`
+                  - Provide translations in language files for each tier variant (EN, IT, etc.)
                 - Provide the six combined textures to avoid fallback.
                 - Use the `recipe` field if you want players to convert empty generators in-world by right-click.
+                
+                Translation Example
+                In `lang/en_us.json`:
+                ```json
+                {
+                  "generator.red_sand.name.wooden": "Wooden Red Sand Generator",
+                  "generator.red_sand.name.netherite": "Netherite Red Sand Generator"
+                }
+                ```
+                
+                In `lang/it_it.json`:
+                ```json
+                {
+                  "generator.red_sand.name.wooden": "Generatore di Sabbia Rossa in Legno",
+                  "generator.red_sand.name.netherite": "Generatore di Sabbia Rossa Netherite"
+                }
+                ```
                 """;
 
             Files.writeString(readme, content, StandardCharsets.UTF_8,

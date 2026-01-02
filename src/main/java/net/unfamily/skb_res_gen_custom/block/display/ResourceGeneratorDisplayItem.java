@@ -24,6 +24,7 @@ import software.bernie.geckolib.animatable.SingletonGeoAnimatable;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
+import net.minecraft.network.chat.MutableComponent;
 
 public class ResourceGeneratorDisplayItem extends BlockItem implements GeoItem {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -63,19 +64,20 @@ public class ResourceGeneratorDisplayItem extends BlockItem implements GeoItem {
             String baseId = genData.getString("base_id");
             
             if (!tier.isEmpty() && !baseId.isEmpty()) {
-                // Format name: "Diamond Obsidian Generator"
-                String tierCapitalized = tier.substring(0, 1).toUpperCase() + tier.substring(1);
-                String baseIdFormatted = baseId.replace("-", " ").replace("_", " ");
-                String[] words = baseIdFormatted.split(" ");
-                StringBuilder formatted = new StringBuilder();
-                for (String word : words) {
-                    if (word.length() > 0) {
-                        formatted.append(word.substring(0, 1).toUpperCase())
-                                 .append(word.substring(1))
-                                 .append(" ");
+                GeneratorDefinition def = GeneratorLoader.getGenerator(baseId);
+                if (def != null) {
+                    String nameKey = def.getName().getString();
+                    
+                    // If name starts with "generator.", use translation key: name.tier
+                    if (nameKey.startsWith("generator.")) {
+                        String translationKey = nameKey + "." + tier.toLowerCase();
+                        return Component.translatable(translationKey);
+                    } else {
+                        // Fallback: "Resource" + name + "Generator" + tier (e.g., "Resource Obsidian Generator Wooden")
+                        String tierCapitalized = tier.substring(0, 1).toUpperCase() + tier.substring(1);
+                        return Component.literal("Resource " + nameKey + " Generator " + tierCapitalized);
                     }
                 }
-                return Component.literal(tierCapitalized + " " + formatted.toString().trim() + " Generator");
             }
         }
         
@@ -98,7 +100,8 @@ public class ResourceGeneratorDisplayItem extends BlockItem implements GeoItem {
                 String baseId = genData.getString("baseId");
                 GeneratorDefinition def = GeneratorLoader.getGenerator(baseId);
                 if (def != null && def.getName() != null) {
-                    tooltip.add(Component.literal("§7Type: §f" + def.getName()));
+                    // Prefix label and append the generator's component name so translations/styles are preserved
+                    tooltip.add(Component.literal("§7Type: §f").append(def.getName()));
                 }
             }
             

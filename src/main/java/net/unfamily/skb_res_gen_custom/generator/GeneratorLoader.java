@@ -245,12 +245,17 @@ public class GeneratorLoader {
                 stacks[i] = stacksArray.get(i).getAsInt();
             }
             
-            // Get name (required)
+            // Get name (required) - supports translation keys (Minecraft auto-handles fallback)
             if (!generatorJson.has("name") || !generatorJson.get("name").isJsonPrimitive()) {
-                LOGGER.error("Custom generator definition missing 'name' field for base_id: {}", baseId);
+                LOGGER.error("Custom generator definition missing or invalid 'name' field for base_id: {}", baseId);
                 return;
             }
-            String name = generatorJson.get("name").getAsString();
+            String nameStr = generatorJson.get("name").getAsString();
+            if (nameStr.trim().isEmpty()) {
+                LOGGER.error("Custom generator definition 'name' cannot be empty for base_id: {}", baseId);
+                return;
+            }
+            net.minecraft.network.chat.Component nameComponent = net.minecraft.network.chat.Component.translatable(nameStr);
             
             // Get recipe item (optional, defaults to null)
             String recipe = null;
@@ -259,7 +264,7 @@ public class GeneratorLoader {
             }
             
             // Create generator definition
-            GeneratorDefinition definition = new GeneratorDefinition(baseId, name, creativeTab, output, times, stacks, recipe);
+            GeneratorDefinition definition = new GeneratorDefinition(baseId, nameComponent, creativeTab, output, times, stacks, recipe);
             
             // Validate definition
             if (!definition.isValid()) {

@@ -1,20 +1,21 @@
 package net.unfamily.skb_res_gen_custom.generator;
 
 import java.util.Arrays;
+import net.minecraft.network.chat.Component;
 
 /**
  * Custom generator definition
  */
 public class GeneratorDefinition {
     private final String baseId;
-    private final String name; // Readable name (required)
+    private final Component name; // Readable name as a translatable/literal component
     private final boolean creativeTab;
     private final String output;
     private final int[] times;
     private final int[] stacks;
     private final String recipe; // Item ID for conversion (e.g., "minecraft:obsidian")
     
-    public GeneratorDefinition(String baseId, String name, boolean creativeTab, String output, int[] times, int[] stacks, String recipe) {
+    public GeneratorDefinition(String baseId, Component name, boolean creativeTab, String output, int[] times, int[] stacks, String recipe) {
         this.baseId = baseId;
         this.name = name;
         this.creativeTab = creativeTab;
@@ -28,7 +29,7 @@ public class GeneratorDefinition {
         return baseId;
     }
     
-    public String getName() {
+    public Component getName() {
         return name;
     }
     
@@ -60,7 +61,7 @@ public class GeneratorDefinition {
             return false;
         }
         
-        if (name == null || name.trim().isEmpty()) {
+        if (name == null || name.getString().trim().isEmpty()) {
             return false;
         }
         
@@ -97,7 +98,7 @@ public class GeneratorDefinition {
     public String toString() {
         return "GeneratorDefinition{" +
                 "baseId='" + baseId + '\'' +
-                ", name='" + name + '\'' +
+                ", name='" + name.getString() + '\'' +
                 ", creativeTab=" + creativeTab +
                 ", output='" + output + '\'' +
                 ", times=" + Arrays.toString(times) +
