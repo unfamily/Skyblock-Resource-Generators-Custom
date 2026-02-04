@@ -69,9 +69,9 @@ public class SkbResGenCustom {
         event.enqueueWork(() -> {
             LOGGER.info("Loading custom generator definitions...");
             net.unfamily.skb_res_gen_custom.generator.GeneratorLoader.scanConfigDirectory();
-            // Generate README in the same directory the loader scans (run/kubejs/external_scripts/skb_res_gen_custom/)
+            // Generate README in the same directory the loader scans (Modpack/kubejs/external_scripts/skb_res_gen_custom/)
             try {
-                Path readmeDir = Path.of("run", "kubejs", "external_scripts", "skb_res_gen_custom");
+                Path readmeDir = Path.of("Modpack", "kubejs", "external_scripts", "skb_res_gen_custom");
                 ReadmeGenerator.writeReadme(readmeDir, true); // force overwrite to apply latest template
             } catch (Exception e) {
                 LOGGER.debug("Failed to generate README for custom generators: {}", e.getMessage());

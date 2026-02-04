@@ -33,7 +33,7 @@ public final class ReadmeGenerator {
                 # Skyblock Resource Generators - generators.json guide
 
                 Location
-                - Place your configuration file at: `run/kubejs/external_scripts/skb_res_gen_custom/generators.json`
+                - Place your configuration file at: `Modpack/kubejs/external_scripts/skb_res_gen_custom/generators.json`
                   (the mod reads that path by default; you can change it in the mod config).
 
                 Top-level format
