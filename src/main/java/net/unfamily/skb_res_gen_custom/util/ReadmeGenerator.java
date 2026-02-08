@@ -29,12 +29,13 @@ public final class ReadmeGenerator {
                 return;
             }
 
+            String pathForReadme = dir.resolve("generators.json").toString().replace('\\', '/');
             String content = """
                 # Skyblock Resource Generators - generators.json guide
 
                 Location
-                - Place your configuration file at: `Modpack/kubejs/external_scripts/skb_res_gen_custom/generators.json`
-                  (the mod reads that path by default; you can change it in the mod config).
+                - Place your configuration file at: `%s`
+                  (the mod reads that path; you can change it in the mod config: 000_custom_generators_path).
 
                 Top-level format
                 - JSON object with:
@@ -153,7 +154,7 @@ public final class ReadmeGenerator {
                   "generator.red_sand.name.netherite": "Generatore di Sabbia Rossa Netherite"
                 }
                 ```
-                """;
+                """.formatted(pathForReadme);
 
             Files.writeString(readme, content, StandardCharsets.UTF_8,
                     StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
