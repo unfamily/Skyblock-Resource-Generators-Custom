@@ -13,6 +13,9 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -32,6 +35,7 @@ import net.unfamily.skb_res_gen_custom.generator.GeneratorDefinition;
 import net.unfamily.skb_res_gen_custom.block.display.ResourceGeneratorDisplayItem;
 import net.minecraft.world.item.ItemStack;
 import net.unfamily.skb_res_gen_custom.util.ReadmeGenerator;
+import net.unfamily.skb_res_gen_custom.integration.NativeModCompat;
 import java.nio.file.Path;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
@@ -53,19 +57,28 @@ public class SkbResGenCustom {
         
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::registerCapabilities);
+        modEventBus.addListener(EventPriority.HIGHEST, NativeModCompat::registerCapabilities);
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(NativeModCompat.class);
 
         // Creative tab is now handled by ModCreativeTabs.java
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
+    private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK,
+                ModBlockEntities.RESOURCE_GENERATOR.get(),
+                (generator, side) -> generator.getItemHandler(side));
+    }
+
     private void commonSetup(final FMLCommonSetupEvent event) {
-        // Carica le definizioni dei generatori custom
+        // Load custom generator definitions
         event.enqueueWork(() -> {
             LOGGER.info("Loading custom generator definitions...");
             net.unfamily.skb_res_gen_custom.generator.GeneratorLoader.scanConfigDirectory();

@@ -287,21 +287,21 @@ public class GeneratorLoader {
     }
     
     /**
-     * Ottieni una definizione di generatore tramite ID
+     * Get a generator definition by ID
      */
     public static GeneratorDefinition getGenerator(String baseId) {
         return GENERATORS.get(baseId);
     }
     
     /**
-     * Ottieni tutte le definizioni di generatori
+     * Get all generator definitions
      */
     public static Map<String, GeneratorDefinition> getAllGenerators() {
         return new HashMap<>(GENERATORS);
     }
     
     /**
-     * Ricarica tutte le definizioni
+     * Reload all definitions
      */
     public static void reload() {
         LOGGER.info("Reloading all custom generator definitions...");

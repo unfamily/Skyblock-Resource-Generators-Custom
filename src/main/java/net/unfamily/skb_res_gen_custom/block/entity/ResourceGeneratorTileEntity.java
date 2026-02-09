@@ -19,6 +19,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,6 +35,7 @@ import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import net.unfamily.skb_res_gen_custom.init.ModBlockEntities;
+import net.unfamily.skb_res_gen_custom.integration.NativeModCompat;
 import net.unfamily.skb_res_gen_custom.block.ResourceGeneratorBlock;
 import net.unfamily.skb_res_gen_custom.generator.GeneratorDefinition;
 import net.minecraft.resources.ResourceLocation;
@@ -40,7 +43,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 
 public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntity implements WorldlyContainer, GeoBlockEntity {
     private NonNullList<ItemStack> stacks = NonNullList.withSize(1, ItemStack.EMPTY);
-    private final SidedInvWrapper handler = new SidedInvWrapper(this, null);
 
     private static final int DEFAULT_TICKS_PER_GENERATION = 100; // 5 seconds (default)
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache((GeoAnimatable) this);
@@ -97,7 +99,7 @@ public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntit
     }
     
     /**
-     * Ottieni l'indice del tier (0-5)
+     * Returns the tier index (0-5)
      */
     private int getTierIndex(String tier) {
         return switch (tier.toLowerCase()) {
@@ -111,7 +113,7 @@ public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntit
         };
     }
     
-    // Getters pubblici
+    // Public getters
     public String getTier() { return tier; }
     public String getBaseId() { return baseId; }
     public String getOutputItem() { return outputItem; }
@@ -129,6 +131,10 @@ public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntit
             generateItem();
             getPersistentData().putDouble("ticks_remaining", getTicksPerGeneration());
             setChanged();
+        }
+        // Always try to push when we have items (handles: generator placed first, storage below added later)
+        if (!this.stacks.get(0).isEmpty()) {
+            try { tryInsertIntoInventoryBelow(); } catch (Exception ignored) {}
         }
     }
 
@@ -165,11 +171,6 @@ public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntit
                     this.level.setBlock(this.getBlockPos(), bs.setValue(ResourceGeneratorBlock.ANIMATION, 1), 3);
                 }
             }
-        } catch (Exception ignored) {}
-        
-        // After generating, try to push into inventory below
-        try {
-            tryInsertIntoInventoryBelow();
         } catch (Exception ignored) {}
     }
 
@@ -209,18 +210,37 @@ public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntit
     }
 
     /**
-     * Try to insert items from internal storage into a Container directly below this block.
-     * Attempts to merge with existing stacks and fill empty slots.
+     * Try to insert items from internal storage into the block directly below.
+     * Supports both vanilla Container and modded IItemHandler capability.
      */
     private void tryInsertIntoInventoryBelow() {
         if (this.level == null || this.level.isClientSide) return;
         BlockPos belowPos = this.getBlockPos().below();
         net.minecraft.world.level.block.entity.BlockEntity be = this.level.getBlockEntity(belowPos);
-        if (!(be instanceof Container container)) return;
+        if (be == null) return;
 
         ItemStack toMove = this.stacks.get(0);
         if (toMove.isEmpty()) return;
 
+        // Try vanilla Container first
+        if (be instanceof Container container) {
+            tryInsertIntoContainer(container, toMove);
+            return;
+        }
+
+        // Try IItemHandler capability (modded inventories)
+        IItemHandler handler = this.level.getCapability(Capabilities.ItemHandler.BLOCK, belowPos, Direction.UP);
+        if (handler != null) {
+            tryInsertIntoItemHandler(handler, toMove);
+            be.setChanged();
+            return;
+        }
+    }
+
+    /**
+     * Insert into vanilla Container: merge into existing stacks, then fill empty slots.
+     */
+    private void tryInsertIntoContainer(Container container, ItemStack toMove) {
         // First try to merge into existing compatible stacks
         for (int i = 0; i < container.getContainerSize() && !toMove.isEmpty(); i++) {
             ItemStack target = container.getItem(i);
@@ -246,14 +266,22 @@ public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntit
             }
         }
 
-        // Update our internal slot with remaining items
         this.stacks.set(0, toMove.isEmpty() ? ItemStack.EMPTY : toMove);
         setChanged();
-        if (be instanceof net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity rcbe) {
-            rcbe.setChanged();
-        } else if (be != null) {
-            be.setChanged();
+        if (container instanceof net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
+            blockEntity.setChanged();
         }
+    }
+
+    /**
+     * Insert into IItemHandler (modded chests, barrels, storage drawers, etc.).
+     */
+    private void tryInsertIntoItemHandler(IItemHandler handler, ItemStack toMove) {
+        for (int i = 0; i < handler.getSlots() && !toMove.isEmpty(); i++) {
+            toMove = handler.insertItem(i, toMove, false);
+        }
+        this.stacks.set(0, toMove.isEmpty() ? ItemStack.EMPTY : toMove);
+        setChanged();
     }
 
     @Override
@@ -327,7 +355,7 @@ public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntit
 
     @Override
     public int getMaxStackSize() {
-        return 64;
+        return NativeModCompat.getMaxItemsForTier(tier);
     }
 
     @Override
@@ -337,7 +365,7 @@ public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntit
 
     @Override
     public Component getDisplayName() {
-        // Formatta il nome in modo carino: "Wooden Obsidian Generator"
+        // Format display name nicely: "Wooden Obsidian Generator"
         String tierCapitalized = tier.substring(0, 1).toUpperCase() + tier.substring(1);
         String baseIdFormatted = baseId.replace("-", " ").replace("_", " ");
         String[] words = baseIdFormatted.split(" ");
@@ -382,8 +410,12 @@ public class ResourceGeneratorTileEntity extends RandomizableContainerBlockEntit
         return true;
     }
 
-    public SidedInvWrapper getItemHandler() {
-        return this.handler;
+    /**
+     * Returns IItemHandler for capability queries (hoppers, pipes, etc.).
+     * Side-aware: uses getSlotsForFace / canTakeItemThroughFace / canPlaceItemThroughFace.
+     */
+    public IItemHandler getItemHandler(@Nullable Direction side) {
+        return new SidedInvWrapper(this, side);
     }
 
     /* GeckoLib: minimal animatable implementation so renderer accepts this tile entity */

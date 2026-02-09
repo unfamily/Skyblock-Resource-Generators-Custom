@@ -56,6 +56,20 @@ public final class ReadmeGenerator {
                 - `recipe` (string, optional): item id used to convert an empty generator (e.g. `minecraft:obsidian`).
                    If present, right-clicking an empty generator with this item will convert it to the custom generator.
 
+                Native mod reference (Skyblock Resources base values)
+                - Timing + production per tier (from native mod config + datapack recipes):
+                  | Tier     | Ticks per cycle | Items per cycle |
+                  |----------|-----------------|-----------------|
+                  | Wooden   | 40              | 1               |
+                  | Stone    | 40              | 2               |
+                  | Iron     | 40              | 4               |
+                  | Gold     | 40              | 16              |
+                  | Diamond  | 40              | 32              |
+                  | Netherite| 40              | 64              |
+                - `times`: ticks between each generation (20 ticks = 1 second).
+                - `stacks`: items produced per cycle for each tier (order: wooden, stone, iron, gold, diamond, netherite).
+                - You can match these for consistency or use your own values.
+
                 Validation
                 - `times` and `stacks` MUST have exactly 6 numeric entries.
                 - `base_id` and `name` must be non-empty.
