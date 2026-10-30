@@ -60,9 +60,6 @@ public class SkbResGenCustom {
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(EventPriority.HIGHEST, NativeModCompat::registerCapabilities);
 
-        // Register ourselves for server and other game events we are interested in.
-        // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
-        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.register(NativeModCompat.class);
 

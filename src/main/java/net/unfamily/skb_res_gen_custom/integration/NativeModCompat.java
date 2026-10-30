@@ -1,19 +1,27 @@
 package net.unfamily.skb_res_gen_custom.integration;
 
-import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import com.mojang.logging.LogUtils;
+import org.slf4j.Logger;
+
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.server.level.ChunkMap;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -28,27 +36,39 @@ import org.jetbrains.annotations.Nullable;
  * Compatibility layer for Skyblock Resources (native mod).
  * - Re-registers IItemHandler capability with side-aware handler (fixes hoppers/pipes)
  * - Pushes items into IItemHandler-only inventories below (fixes modded chests)
+ *
+ * NOTE: The native mod's push logic only pushes into BaseContainerBlockEntity (vanilla containers).
+ * This class supplements that by pushing into any IItemHandler (modded storage, drawers, etc.).
+ *
+ * The chunk iteration uses only public NeoForge APIs (ServerChunkCache.getChunkNow + getForcedChunks)
+ * to avoid reflection issues with the Java module system in production environments.
+ * Each dimension uses its own game time to avoid cross-dimension tick counter interference.
  */
 public class NativeModCompat {
     private static final String NATIVE_MOD_ID = "skyblock_resources";
     private static final int PUSH_INTERVAL_TICKS = 20; // Once per second
-    private static long tickCounter = 0;
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static boolean loggedOnce = false;
 
     /**
      * Register capabilities with HIGHEST priority so we run before the native mod.
      * Provides side-aware IItemHandler for all skyblock_resources generators.
      */
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        BuiltInRegistries.BLOCK_ENTITY_TYPE.stream()
-                .filter(type -> {
-                    var key = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(type);
+        int count = 0;
+        for (var type : BuiltInRegistries.BLOCK_ENTITY_TYPE.stream()
+                .filter(t -> {
+                    var key = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(t);
                     return key != null && key.getNamespace().equals(NATIVE_MOD_ID);
-                })
-                .forEach(type -> event.registerBlockEntity(
-                        Capabilities.ItemHandler.BLOCK,
-                        type,
-                        NativeModCompat::getItemHandler
-                ));
+                }).toList()) {
+            event.registerBlockEntity(
+                    Capabilities.ItemHandler.BLOCK,
+                    type,
+                    NativeModCompat::getItemHandler
+            );
+            count++;
+        }
+        LOGGER.info("[NativeModCompat] Registered side-aware IItemHandler for {} native block entity types", count);
     }
 
     @Nullable
@@ -62,50 +82,126 @@ public class NativeModCompat {
     /**
      * Periodically try to push items from native generators into IItemHandler-only blocks below.
      * The native mod's procedures only push into BaseContainerBlockEntity; we handle the rest.
+     *
+     * Uses the level's own game time so each dimension ticks independently,
+     * avoiding cross-dimension tick counter interference.
+     * Only processes levels that have players or force-loaded chunks.
      */
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void onLevelTick(LevelTickEvent.Post event) {
         if (!(event.getLevel() instanceof ServerLevel serverLevel) || serverLevel.isClientSide()) {
             return;
         }
-        tickCounter++;
-        if (tickCounter % PUSH_INTERVAL_TICKS != 0) {
+
+        // Use the level's own game time so each dimension ticks independently
+        if (serverLevel.getGameTime() % PUSH_INTERVAL_TICKS != 0) {
             return;
         }
 
-        if (!(serverLevel.getChunkSource() instanceof ServerChunkCache chunkCache)) return;
-        ChunkMap chunkMap = chunkCache.chunkMap;
-        Iterable<ChunkHolder> chunks = getChunks(chunkMap);
-        if (chunks == null) return;
-        for (ChunkHolder holder : chunks) {
-            var chunkResult = holder.getTickingChunkFuture().getNow(null);
-            if (chunkResult == null) continue;
-            LevelChunk levelChunk = chunkResult.orElse(null);
-            if (levelChunk == null) continue;
-            levelChunk.getBlockEntities().forEach((pos, blockEntity) -> {
-                BlockEntityType<?> type = blockEntity.getType();
-                var typeKey = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(type);
-                if (typeKey == null || !typeKey.getNamespace().equals(NATIVE_MOD_ID)) {
-                    return;
-                }
-                if (!(blockEntity instanceof Container container)) return;
-                ItemStack stack = container.getItem(0);
-                if (stack.isEmpty()) return;
+        // Skip dimensions with no players and no forced chunks (nothing to process)
+        if (serverLevel.players().isEmpty() && serverLevel.getForcedChunks().isEmpty()) {
+            return;
+        }
 
-                BlockPos belowPos = pos.below();
-                IItemHandler handler = serverLevel.getCapability(Capabilities.ItemHandler.BLOCK, belowPos, Direction.UP);
-                if (handler == null) return;
+        try {
+            processLoadedChunks(serverLevel);
+        } catch (Exception e) {
+            LOGGER.error("[NativeModCompat] Error in processLoadedChunks", e);
+        }
+    }
 
-                // Push into IItemHandler below (modded chests, storage drawers, etc.)
-                for (int i = 0; i < handler.getSlots() && !stack.isEmpty(); i++) {
-                    stack = handler.insertItem(i, stack, false);
+    /**
+     * Iterate all loaded and ticking chunks (player-area + force-loaded) and push items
+     * from native generators into IItemHandler inventories below.
+     */
+    private static void processLoadedChunks(ServerLevel serverLevel) {
+        ServerChunkCache chunkSource = serverLevel.getChunkSource();
+        Set<Long> processedChunks = new HashSet<>();
+        int generatorsPushed = 0;
+
+        // 1. Process chunks around each player (ticking area)
+        int simDist = serverLevel.getServer().getPlayerList().getSimulationDistance();
+        for (ServerPlayer player : serverLevel.players()) {
+            ChunkPos playerChunk = player.chunkPosition();
+            for (int dx = -simDist; dx <= simDist; dx++) {
+                for (int dz = -simDist; dz <= simDist; dz++) {
+                    int cx = playerChunk.x + dx;
+                    int cz = playerChunk.z + dz;
+                    if (!processedChunks.add(ChunkPos.asLong(cx, cz))) continue;
+
+                    LevelChunk chunk = chunkSource.getChunkNow(cx, cz);
+                    if (chunk == null) continue;
+
+                    generatorsPushed += processChunk(serverLevel, chunk);
                 }
-                container.setItem(0, stack.isEmpty() ? ItemStack.EMPTY : stack);
+            }
+        }
+
+        // 2. Process force-loaded chunks (chunk loaders, etc.)
+        LongSet forcedChunks = serverLevel.getForcedChunks();
+        if (!forcedChunks.isEmpty()) {
+            forcedChunks.forEach(chunkPosLong -> {
+                if (!processedChunks.add(chunkPosLong)) return;
+                int cx = ChunkPos.getX(chunkPosLong);
+                int cz = ChunkPos.getZ(chunkPosLong);
+                LevelChunk chunk = chunkSource.getChunkNow(cx, cz);
+                if (chunk != null) {
+                    processChunk(serverLevel, chunk);
+                }
+            });
+        }
+
+        // One-time startup log to confirm the fix is active
+        if (!loggedOnce && generatorsPushed > 0) {
+            LOGGER.info("[NativeModCompat] Push fix active - pushed items from native generators in {} chunks",
+                    processedChunks.size());
+            loggedOnce = true;
+        }
+    }
+
+    /**
+     * Process a single chunk: find native generators, push their items into IItemHandler below.
+     * @return number of generators that had items pushed
+     */
+    private static int processChunk(ServerLevel serverLevel, LevelChunk chunk) {
+        // Collect generators first to avoid ConcurrentModificationException during iteration
+        List<Map.Entry<BlockPos, BlockEntity>> generators = new ArrayList<>();
+        for (var entry : chunk.getBlockEntities().entrySet()) {
+            BlockEntity blockEntity = entry.getValue();
+            var typeKey = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(blockEntity.getType());
+            if (typeKey != null && typeKey.getNamespace().equals(NATIVE_MOD_ID)) {
+                generators.add(Map.entry(entry.getKey(), blockEntity));
+            }
+        }
+
+        int pushed = 0;
+        for (var entry : generators) {
+            BlockPos pos = entry.getKey();
+            BlockEntity blockEntity = entry.getValue();
+
+            if (!(blockEntity instanceof Container container)) continue;
+            ItemStack stack = container.getItem(0);
+            if (stack.isEmpty()) continue;
+
+            BlockPos belowPos = pos.below();
+            IItemHandler handler = serverLevel.getCapability(Capabilities.ItemHandler.BLOCK, belowPos, Direction.UP);
+            if (handler == null) continue;
+
+            // Push into IItemHandler below (modded chests, storage drawers, etc.)
+            ItemStack remaining = stack;
+            for (int i = 0; i < handler.getSlots() && !remaining.isEmpty(); i++) {
+                remaining = handler.insertItem(i, remaining, false);
+            }
+
+            if (remaining.getCount() != stack.getCount()) {
+                container.setItem(0, remaining.isEmpty() ? ItemStack.EMPTY : remaining);
                 blockEntity.setChanged();
                 BlockEntity belowBe = serverLevel.getBlockEntity(belowPos);
                 if (belowBe != null) belowBe.setChanged();
-            });
+                pushed++;
+            }
         }
+        return pushed;
     }
 
     /**
@@ -141,17 +237,5 @@ public class NativeModCompat {
             case "netherite" -> 4096;
             default -> 128;
         };
-    }
-
-    @SuppressWarnings("unchecked")
-    @Nullable
-    private static Iterable<ChunkHolder> getChunks(ChunkMap chunkMap) {
-        try {
-            Method m = ChunkMap.class.getDeclaredMethod("getChunks");
-            m.setAccessible(true);
-            return (Iterable<ChunkHolder>) m.invoke(chunkMap);
-        } catch (Exception e) {
-            return null;
-        }
     }
 }
